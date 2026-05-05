@@ -1,330 +1,294 @@
-# Student Loan Management System for MFU
+# Mae Fah Luang Template Document Generator
 
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
-[![Node.js 18+](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
-[![Vue.js 3.5](https://img.shields.io/badge/Vue.js-3.5-4FC08D)](https://vuejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED)](https://www.docker.com/)
+Mae Fah Luang Template Document Generator is a full-stack web application for creating reusable document and report layouts from structured JSON data. It is designed for Mae Fah Luang University teams that need to turn operational datasets into consistent, previewable reports without rebuilding tables, charts, and document structure for every use case.
 
-A full-stack web application for managing student loan applications at Mae Fah Luang University (MFU), Thailand. The system provides role-based access control for students and administrative staff, supporting application submission, document management, verification workflows, and reporting.
+The application supports a practical template workflow: upload a JSON data file, select an approved template, validate the template against the uploaded fields, configure table and chart sections, and preview the final report before using or saving the template. This makes the system suitable for internal university reporting, administrative dashboards, departmental summaries, and repeatable document generation workflows.
+
+The core product module lives in `frontend/src/views/templates`, including the upload area, template selector, template builder modal, table configuration, chart configuration, reusable data table renderer, chart renderer, and document preview screen.
+
+## Product Purpose
+
+- Standardize recurring Mae Fah Luang University report formats
+- Reduce manual report layout work across departments and administrative units
+- Let teams reuse approved templates with different datasets
+- Provide a visual preview before a generated document or report is used
+- Support tables and charts in the same configurable document layout
+- Keep template definitions structured so they can be stored, reviewed, and reused
 
 ## Features
 
-### Student Portal
-- User authentication via email/password or Google OAuth
-- Submit first and second semester loan applications
-- Upload supporting documents with file validation
-- Track application status through approval workflow
-- View and manage personal information
+- Drag-and-drop JSON file upload for report data
+- Template selector with search, sorting, pagination, active/inactive status, and field mismatch warning
+- Template builder modal for editing template metadata, document metadata, data source, tables, and charts
+- Table manager for selecting JSON fields, renaming column labels, adding multiple table sections, and previewing table output
+- Chart manager for configuring bar, line, radar, pie, doughnut, and polar-area charts from numeric fields
+- Live preview while building a template
+- Document preview page that renders configured tables and charts against uploaded data
+- Reusable generic data table with filtering, sorting, and pagination
+- Express/MongoDB backend model and REST API for template persistence
+- Settings APIs for reusable messages, status values, and verification records
+- Swagger UI for API inspection at `/api-docs`
+- Docker support for frontend, backend, MongoDB, and mongo-express
 
-### Staff Portal
-- Review and verify student loan applications
-- Edit application data and loan information
-- Export application data to Excel format
-- Manage staff settings and permissions
-- Handle application rejections and appeals
-- Email-based role authorization
-
-## Technology Stack
+## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Frontend | Vue.js 3.5.13, Vue Router 4, Vuex 4, Bootstrap 5 |
-| Backend | Node.js, Express.js 4.21.2, JWT Authentication |
-| Database | MySQL 8.0, mysql2 3.14.0 |
-| Infrastructure | Docker, Docker Compose, Nginx, PM2 |
-| File Processing | ExcelJS 4.4.0, PDFKit 0.17.1, Multer 1.4.5 |
+| --- | --- |
+| Frontend | Vue 2, Vue Router 3, Vuex 3, CoreUI Pro Vue, CoreUI chart components |
+| Backend | Node.js, Express, Mongoose, Socket.IO |
+| Database | MongoDB 6 |
+| API Docs | Swagger UI |
+| Build/Runtime | npm, pnpm, Docker, Docker Compose, Nginx |
+| Testing | Jest, Vue Test Utils, Nightwatch |
 
-## Project Structure
+## Repository Structure
 
-```
-studentLoan-Linux-MFU/
-├── backend/
-│   ├── api/
-│   │   ├── session_api.js
-│   │   ├── user_api.js
-│   │   └── staff/
-│   ├── config/
-│   │   ├── db.js
-│   │   ├── corsConfig.js
-│   │   ├── sessionConfig.js
-│   │   └── staff.js
-│   ├── middleware/
-│   ├── utils/
-│   ├── docker-entrypoint-initdb.d/Student_loan.sql
-│   ├── uploads/
-│   └── server.js
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── mixins/
-│   │   └── main.js
-│   └── package.json
-├── nginx/
-├── docker-compose.yml
-└── example.env
+```text
+.
+|-- backend/
+|   |-- config/                 # Express, CORS, rate limit, logger, runtime config
+|   |-- helpers/                # Mongo initialization, Redis helper, base service utilities
+|   |-- middleware/             # Express middleware stack
+|   |-- server/
+|   |   |-- Project/
+|   |   |   |-- Settings/       # Message, status, and verification APIs
+|   |   |   `-- Templates/      # Template model, routes, controller, and service
+|   |   |-- routes/             # API route registration and socket wiring
+|   |   `-- swagger/            # Swagger JSON definitions
+|   |-- Dockerfile
+|   |-- docker-compose.yml
+|   `-- server.js
+|-- frontend/
+|   |-- public/                 # Static assets, icons, ML model files, manifest
+|   |-- src/
+|   |   |-- assets/             # Images, icons, SCSS, fonts
+|   |   |-- containers/         # CoreUI layout containers
+|   |   |-- projects/           # Project-specific screens and reusable components
+|   |   |-- service/            # Axios API client and Socket.IO client
+|   |   |-- store/              # Vuex modules
+|   |   `-- views/
+|   |       `-- templates/      # Upload, selector, builder, tables, charts, preview
+|   |-- Dockerfile
+|   |-- docker-compose.yml
+|   `-- package.json
+`-- README.md
 ```
 
 ## Prerequisites
 
-### Docker Setup (Recommended)
-- Docker 20.10 or later
-- Docker Compose 1.29 or later
-- 2GB available disk space
+- Node.js 18 or later for the backend
+- Node.js 20 or later for the frontend Docker build
+- npm 9 or later
+- pnpm for backend Docker/runtime parity
+- MongoDB 6, or Docker with Docker Compose
 
-### Manual Setup
-- Node.js 18.0 or later
-- npm 9.0 or later
-- MySQL 8.0 or later
-- Git
+The frontend is based on Vue CLI 4 and Vue 2. Some dependencies are older and may require `--legacy-peer-deps` during installation.
 
-### Additional Requirements
-- Google OAuth credentials (for authentication)
-- Internet connection for dependency installation
+## Environment Variables
 
-## Installation
+Create `backend/.env` for local backend development:
 
-### Docker Compose
+```env
+NODE_ENV=development
+PORT=8081
 
-```bash
-# Clone repository
-git clone https://github.com/yourusername/studentLoan-Linux-MFU.git
-cd studentLoan-Linux-MFU
+KEY=
+MONGODB=mongodb://127.0.0.1:27017/Centers?authSource=admin
 
-# Setup environment configuration
-cp backend/example.env backend/.env
+TIMEOUT=500000
+TOKENLANGTH=32
+TOKENEXPIRED=30
+TRANSACTIONEXPIRED=10
 
-# Edit .env with your configuration
-nano backend/.env
-
-# Start services
-docker-compose up -d
-
-# Verify services are running
-docker-compose ps
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=
+SMTP_PASS=
 ```
 
-**Service URLs:**
-- Frontend: http://localhost:8010
-- Backend API: http://localhost:8020
-- PhpMyAdmin: http://localhost:8040
-- MySQL: localhost:8030
+Create `frontend/.env` for local frontend development:
 
-### Manual Setup
+```env
+VUE_APP_TITLE=Template Document
+VUE_APP_API_URL=http://127.0.0.1:8081
+VUE_APP_VERSION=1.0.0
 
-**Backend:**
+VUE_APP_CLIENTID=
+VUE_APP_SCOPE=profile email
+VUE_APP_PROMPT=select_account
+```
+
+Do not commit real secrets, SMTP credentials, OAuth client IDs, database credentials, or production connection strings.
+
+## Getting Started
+
+### Backend
+
 ```bash
 cd backend
-npm install
-cp example.env .env
-# Configure .env with database credentials
-npm run dev
+pnpm install
+pnpm start
 ```
 
-**Frontend:**
+The API runs on the port defined by `PORT` in `backend/.env`. With the example configuration, the backend is available at:
+
+- API: `http://127.0.0.1:8081`
+- Health check: `http://127.0.0.1:8081/healthz`
+- Swagger UI: `http://127.0.0.1:8081/api-docs`
+
+### Frontend
+
 ```bash
 cd frontend
-npm install
+npm install --legacy-peer-deps
 npm run serve
 ```
 
-## Environment Configuration
+Vue CLI will print the local development URL, commonly `http://localhost:8080`.
 
-Create `backend/.env` with the following variables:
+### Docker
 
-```env
-# Server
-BACKEND_PORT=3000
-BACKEND_HOSTNAME=localhost
+Backend, MongoDB, and mongo-express:
 
-# Security (generate unique values for production)
-SESSION_SECRET=your-session-secret
-JWT_SECRET=your-jwt-secret
-
-# Authentication
-GOOGLE_CLIENT_ID=your-google-client-id
-
-# CORS
-ALLOWED_ORIGINS=http://localhost:8010
-
-# Database
-DB_HOST=mysql
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your-password
-DB_NAME=Student_loan
-```
-
-## API Endpoints
-
-### Session Management
-```
-POST   /session/login
-POST   /session/login-google
-POST   /session/logout
-POST   /session/reset
-GET    /session/verify
-```
-
-### User Operations
-```
-POST   /user/register
-POST   /user/loan
-POST   /user/loan-second-semester
-GET    /user/loan
-GET    /user/status
-POST   /user/upload-document
-GET    /user/documents
-```
-
-### Staff Operations (Authenticated)
-```
-GET    /staff/users
-GET    /staff/users/:id
-PUT    /staff/users/:id
-POST   /staff/export-excel
-POST   /staff/export-pdf
-GET    /staff/settings
-PUT    /staff/settings
-GET    /staff/rejected
-```
-
-## Database
-
-The MySQL database is automatically initialized on first run with the schema defined in `backend/docker-entrypoint-initdb.d/Student_loan.sql`.
-
-**Main tables:**
-- Faculty and field of study information
-- Loan applications and second semester loans
-- User document uploads and verification
-- Staff settings and permissions
-- Application rejection records
-
-### Backup and Restore
-
-```bash
-# Backup
-docker exec studentloan-mysql mysqldump -u root -p Student_loan > backup.sql
-
-# Restore
-docker exec -i studentloan-mysql mysql -u root -p Student_loan < backup.sql
-```
-
-## Deployment
-
-### Production Deployment
-
-```bash
-docker-compose -f docker-compose.yml up -d
-```
-
-**Configuration:**
-- Backend service on port 8020
-- MySQL service on port 8030 with persistent volume
-- Nginx reverse proxy on port 8010
-- Automated database backups at 03:00 daily
-- Timezone: Asia/Bangkok
-
-### Scaling Considerations
-- Backend: PM2 process manager with multi-process support
-- Database: MySQL 8.0 with connection pooling
-- Recommended: 5-10 concurrent connections per backend instance
-
-## Troubleshooting
-
-### Database Connection Error
-- Verify MySQL container is running: `docker-compose ps`
-- Check DB_HOST in .env (use 'mysql' for Docker, 'localhost' for manual setup)
-- Review logs: `docker-compose logs mysql`
-
-### Session Issues
-- Ensure SESSION_SECRET is configured in .env
-- Clear browser cookies and login again
-- Verify system clock accuracy
-
-### File Upload Failures
-- Check upload directory: `docker exec studentloan-backend ls -la /app/uploads/loan_files/`
-- Verify disk space: `docker exec studentloan-backend df -h`
-- Allowed file types: PDF, JPG, PNG only
-- Maximum file size: 5MB (configurable)
-
-### Google OAuth Login Failures
-- Verify GOOGLE_CLIENT_ID is active in Google Cloud Console
-- Configure redirect URIs in Google OAuth settings
-- Check browser console for CORS errors
-
-### Staff Access Denied
-- Verify staff email is in `backend/config/staff.js`
-- Add email to STAFF_EMAILS array if needed
-- Restart backend: `docker-compose restart backend`
-
-## Development
-
-### Running Tests
 ```bash
 cd backend
-npm test
+docker compose up --build
 ```
 
-### Build for Production
+Default service URLs:
+
+- Backend API: `http://localhost:8082`
+- MongoDB: `localhost:27017`
+- mongo-express: `http://localhost:8083`
+
+Frontend production build served by Nginx:
+
 ```bash
 cd frontend
-npm run build
+docker compose up --build
 ```
 
-Output: `frontend/dist/`
+Default frontend URL:
 
-### Logs
+- Frontend: `http://localhost:8080`
+
+## API Overview
+
+All application routes are mounted under `/api/v1`.
+
+### Templates
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/templates` | List templates |
+| `GET` | `/api/v1/templates/:id` | Read one template |
+| `POST` | `/api/v1/templates` | Create a template |
+| `PUT` | `/api/v1/templates` | Update a template |
+| `DELETE` | `/api/v1/templates` | Delete templates matching the request query/body handled by the service |
+
+### Settings
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/setting/message` | List message records |
+| `POST` | `/api/v1/setting/message` | Create a message record |
+| `PUT` | `/api/v1/setting/message` | Update a message record |
+| `DELETE` | `/api/v1/setting/message` | Delete message records |
+| `GET` | `/api/v1/setting/status` | List status records |
+| `POST` | `/api/v1/setting/status` | Create a status record |
+| `PUT` | `/api/v1/setting/status` | Update a status record |
+| `DELETE` | `/api/v1/setting/status` | Delete status records |
+| `GET` | `/api/v1/setting/verification` | List verification records |
+| `POST` | `/api/v1/setting/verification` | Create a verification record |
+| `PUT` | `/api/v1/setting/verification` | Update a verification record |
+| `DELETE` | `/api/v1/setting/verification` | Delete verification records |
+
+Swagger definitions are loaded from `backend/server/swagger/app.json` and `backend/server/swagger/app1.json`.
+
+## Template Data Model
+
+Templates are represented in the frontend and backend with the following high-level structure. The frontend currently demonstrates template selection with local mock data, while the backend provides a MongoDB model and REST routes for persistence.
+
+```js
+{
+  templateMeta: {
+    name: String,
+    description: String,
+    ownerDepartment: [String],
+    status: Boolean
+  },
+  documentMeta: {
+    name: String,
+    description: String,
+    dataSource: String
+  },
+  layout: {
+    tables: [
+      {
+        name: String,
+        fields: [{ key: String, label: String }]
+      }
+    ],
+    charts: [
+      {
+        name: String,
+        type: "bar" | "line" | "radar" | "pie" | "doughnut" | "polarArea",
+        labelKey: String,
+        valueKeys: [String],
+        valueKey: String,
+        colors: [String],
+        style: String
+      }
+    ]
+  }
+}
+```
+
+## Development Commands
+
+Backend:
+
 ```bash
-# View all logs
-docker-compose logs -f
-
-# View specific service
-docker-compose logs -f backend
-docker-compose logs -f mysql
-
-# Last 100 lines
-docker-compose logs -f --tail=100 backend
+cd backend
+pnpm start
+pnpm run serve:test
+pnpm run serve:prod
 ```
 
-## Security Considerations
+Frontend:
 
-- Generate unique SESSION_SECRET and JWT_SECRET for production
-- Use HTTPS in production with SSL certificates
-- Configure CORS to only allow known frontend domains
-- Use strong database passwords
-- Implement proper firewall rules for MySQL
-- Keep Docker images updated regularly
+```bash
+cd frontend
+npm run serve
+npm run build
+npm run lint
+npm run test:unit
+npm run test:e2e
+npm run release
+```
 
-## Contributing
+## Testing
 
-To contribute to this project:
+The frontend includes Jest unit tests and Nightwatch end-to-end tests inherited from the Vue CLI/CoreUI setup.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m 'Add feature description'`
-4. Push to branch: `git push origin feature/your-feature`
-5. Submit a pull request
+```bash
+cd frontend
+npm run test:unit
+npm run test:e2e
+```
+
+The backend currently has a placeholder `npm test` script. Add endpoint, service, and model tests before relying on automated backend validation in CI.
+
+## Production Notes
+
+- Set `NODE_ENV=production` and provide a production MongoDB connection string.
+- Restrict CORS origins before exposing the API publicly.
+- Replace development tokens and placeholder keys with managed secrets.
+- Serve the frontend through HTTPS in production.
+- Review the static `X-Access-Token` behavior in the frontend API client before deployment.
+- Keep MongoDB behind the application network; avoid exposing it directly to the public internet.
+- Add authentication and authorization middleware around management APIs if this dashboard is used beyond a trusted internal network.
 
 ## License
 
-This project is licensed under the ISC License - see [LICENSE](LICENSE) for details.
-
-## Support
-
-For issues, questions, or suggestions:
-- Open an [Issue](https://github.com/yourusername/studentLoan-Linux-MFU/issues)
-- Submit a [Discussion](https://github.com/yourusername/studentLoan-Linux-MFU/discussions)
-- Contact: MFU Development Team
-
-## Project Information
-
-- **Organization**: Mae Fah Luang University (MFU), Thailand
-- **Version**: 1.0.0
-- **Status**: Active Development
-- **Last Updated**: April 2026
-
-
-
-Document และ วิดีโอการใช้งานของ Report.mfu.ac.th
-
-https://drive.google.com/drive/folders/1ZNkuL-YF9UyTCK4pBIk_tBgrKKLbcj6n?usp=sharing
+The backend package is marked as ISC. The frontend package is based on CoreUI Pro Vue and references the CoreUI Pro license. Review third-party license obligations before publishing or distributing this project.
